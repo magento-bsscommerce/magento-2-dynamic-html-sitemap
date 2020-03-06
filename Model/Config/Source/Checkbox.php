@@ -12,11 +12,15 @@
  * @category   BSS
  * @package    BSS_HtmlSiteMap
  * @author     Extension Team
- * @copyright  Copyright (c) 2017-2018 BSS Commerce Co. ( http://bsscommerce.com )
+ * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
 namespace Bss\HtmlSiteMap\Model\Config\Source;
 
+/**
+ * Class Checkbox
+ * @package Bss\HtmlSiteMap\Model\Config\Source
+ */
 class Checkbox extends \Magento\Framework\View\Element\Template
 {
     /**

@@ -15,24 +15,24 @@
  * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
-namespace Bss\HtmlSiteMap\Model\Config\Source;
+namespace Bss\HtmlSiteMap\Model\Config\Product;
+
+use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
 
 /**
- * Class Custom
- * @package Bss\HtmlSiteMap\Model\Config\Source
+ * Class ExcludeHtmlSiteMap
+ * @package Bss\HtmlSiteMap\Model\Config\Product
  */
-class Custom implements \Magento\Framework\Option\ArrayInterface
+class ExcludeHtmlSiteMap extends AbstractSource
 {
     /**
      * @return array
      */
-    public function toOptionArray()
+    public function getAllOptions()
     {
- 
-        return [
-            ['value' => 'name', 'label' => __('Name')],
-            ['value' => 'date', 'label' => __('Date')],
-            ['value' => 'price', 'label' => __('Price')],
-        ];
+        $this->_options = [];
+        $this->_options[] = ['label' => 'No', 'value' => '0'];
+        $this->_options[] = ['label' => 'Yes', 'value' => '1'];
+        return $this->_options;
     }
 }

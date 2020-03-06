@@ -15,24 +15,25 @@
  * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
-namespace Bss\HtmlSiteMap\Model\Config\Source;
-
+?>
+<?php
 /**
- * Class Custom
- * @package Bss\HtmlSiteMap\Model\Config\Source
+ * SEO Toolbar template
+ *
+ * @var $block Bss\HtmlSiteMap\Block\ItemsCollection
  */
-class Custom implements \Magento\Framework\Option\ArrayInterface
-{
-    /**
-     * @return array
-     */
-    public function toOptionArray()
-    {
- 
-        return [
-            ['value' => 'name', 'label' => __('Name')],
-            ['value' => 'date', 'label' => __('Date')],
-            ['value' => 'price', 'label' => __('Price')],
-        ];
-    }
-}
+?>
+<?php
+$helper = $block->getHelper();
+$baseUrl = $helper->getBaseUrl();
+$getEnable = $helper->isEnable();
+$urlKey = $helper->getModuleRoute();
+$titleSiteMap = $helper->getTitleSiteMap();
+$showLinkAt = $helper->getShowLinkAt();
+?>
+<?php if ($getEnable && $showLinkAt === 'top') : ?>
+    <li>
+        <a href="<?php echo $baseUrl . $urlKey; ?>"><?php echo $block->escapeHtml($titleSiteMap); ?></a>
+    </li>
+<?php
+endif;

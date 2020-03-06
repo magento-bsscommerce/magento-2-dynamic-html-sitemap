@@ -18,10 +18,19 @@
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-	<update handle="sitemap_index_index" />
     <body>
         <referenceContainer name="content">
-            <block class="Bss\HtmlSiteMap\Block\CategoryCollection" name="category_list_template" template="category_cms_list.phtml" />
+            <block class="Bss\HtmlSiteMap\Block\ItemsCollection" name="sitemap"/>
+        </referenceContainer>
+        <referenceContainer name="content">
+            <container htmlTag="div" htmlClass="signature" name="custom_signature" after="-">
+                <block class="Magento\Framework\View\Element\Html\Link" name="signature">
+                    <arguments>
+                        <argument name="path" xsi:type="string">https://bsscommerce.com/magento-2-extensions.html</argument>
+                        <argument name="label" xsi:type="string">Powered by BSS Commerce</argument>
+                    </arguments>
+                </block>
+            </container>
         </referenceContainer>
     </body>
 </page>

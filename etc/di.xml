@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" ?>
 <!--
 /**
  * BSS Commerce Co.
@@ -17,8 +17,8 @@
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-	<event name="layout_load_before">
-		<observer name="add_sitemap" instance="Bss\HtmlSiteMap\Observer\AddSitemap" />
-	</event>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Model\Category\DataProvider">
+        <plugin name="bss_html_sitemap_exclude_html_sitemap" type="Bss\HtmlSiteMap\Plugin\Model\Category\DataProvider" sortOrder="1" disabled="false"/>
+    </type>
 </config>

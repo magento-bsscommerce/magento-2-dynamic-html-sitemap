@@ -13,7 +13,7 @@
  * @category   BSS
  * @package    BSS_HtmlSiteMap
  * @author     Extension Team
- * @copyright  Copyright (c) 2017-2018 BSS Commerce Co. ( http://bsscommerce.com )
+ * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
 -->
@@ -22,13 +22,13 @@
         <bss_htmlsitemap>
             <general>
                 <enable>1</enable>
-                <title>Sitemap</title>
+                <title>HTML Sitemap</title>
+                <router>html-sitemap</router>
+                <show_link>footer</show_link>
                 <order_templates>1,2,3,4</order_templates>
             </general>
             <for_search>
                 <meta_title>Sitemap</meta_title>
-                <keywords></keywords>
-                <description></description>
             </for_search>
             <product>
                 <title_product>Product List</title_product>
@@ -40,12 +40,10 @@
             <category>
                 <title_category>Category List</title_category>
                 <enable_category>1</enable_category>
-                <id_category></id_category>
             </category>
             <cms>
                 <title_cms>CMS List</title_cms>
                 <enable_cms>1</enable_cms>
-                <do_something></do_something>
             </cms>
             <store>
                 <title_store>Store View List</title_store>

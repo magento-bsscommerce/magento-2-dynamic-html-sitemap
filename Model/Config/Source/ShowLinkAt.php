@@ -1,5 +1,4 @@
-<?xml version="1.0"?>
-<!--
+<?php
 /**
  * BSS Commerce Co.
  *
@@ -16,9 +15,24 @@
  * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
--->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-	<event name="layout_load_before">
-		<observer name="add_sitemap" instance="Bss\HtmlSiteMap\Observer\AddSitemap" />
-	</event>
-</config>
+namespace Bss\HtmlSiteMap\Model\Config\Source;
+
+/**
+ * Class ShowLinkAt
+ * @package Bss\HtmlSiteMap\Model\Config\Source
+ */
+class ShowLinkAt implements \Magento\Framework\Option\ArrayInterface
+{
+    /**
+     * Options getter
+     *
+     * @return array
+     */
+    public function toOptionArray()
+    {
+        return [
+            ['value' => 'footer', 'label' => __('Footer')],
+            ['value' => 'top', 'label' => __('In Top Menu')]
+        ];
+    }
+}

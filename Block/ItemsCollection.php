@@ -12,16 +12,20 @@
  * @category   BSS
  * @package    BSS_HtmlSiteMap
  * @author     Extension Team
- * @copyright  Copyright (c) 2017-2018 BSS Commerce Co. ( http://bsscommerce.com )
+ * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
 namespace Bss\HtmlSiteMap\Block;
 
-use Magento\Directory\Helper\Data;
+use Magento\Framework\App\ActionInterface;
+use Magento\Framework\Url\EncoderInterface;
+use Magento\Framework\Url\Helper\Data as UrlHelper;
+use Magento\Store\Model\Store;
 
 /**
  * Class ItemsCollection
  * @package Bss\HtmlSiteMap\Block
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class ItemsCollection extends \Magento\Framework\View\Element\Template
 {
@@ -40,11 +44,6 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
     public $categoryFactory;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    public $storeManager;
-
-    /**
      * @var \Magento\Store\Block\Switcher\Interceptor
      */
     public $interceptor;
@@ -58,7 +57,6 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
      * @var $helper
      */
     public $helper;
-    
     /**
      * @var bool
      */
@@ -68,23 +66,36 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
      * @var \Magento\Framework\Data\Helper\PostHelper
      */
     public $postDataHelper;
+    /**
+     * @var EncoderInterface
+     */
+    private $encoder;
+    /**
+     * @var UrlHelper
+     */
+    private $urlHelper;
 
     /**
      * ItemsCollection constructor.
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Bss\HtmlSiteMap\Helper\Data $helper
      * @param \Magento\Framework\Data\Helper\PostHelper $postDataHelper
+     * @param EncoderInterface $encoder
+     * @param UrlHelper $urlHelper
      * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Bss\HtmlSiteMap\Helper\Data $helper,
         \Magento\Framework\Data\Helper\PostHelper $postDataHelper,
+        EncoderInterface $encoder,
+        UrlHelper $urlHelper,
         array $data = []
     ) {
+        $this->urlHelper = $urlHelper;
+        $this->encoder = $encoder;
         $this->scopeConfig = $context->getScopeConfig();
         $this->helper = $helper;
-        $this->storeManager = $context->getStoreManager();
         $this->postDataHelper = $postDataHelper;
         parent::__construct($context, $data);
     }
@@ -95,7 +106,7 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
      */
     public function getStoreId()
     {
-        return $this->storeManager->getStore()->getId();
+        return $this->_storeManager->getStore()->getId();
     }
 
     /**
@@ -112,7 +123,7 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
      */
     public function getWebsiteId()
     {
-        return $this->storeManager->getStore()->getWebsiteId();
+        return $this->_storeManager->getStore()->getWebsiteId();
     }
 
     /**
@@ -121,7 +132,7 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
      */
     public function getStoreCode()
     {
-        return $this->storeManager->getStore()->getCode();
+        return $this->_storeManager->getStore()->getCode();
     }
 
     /**
@@ -131,7 +142,7 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
      */
     public function getStoreUrl($fromStore = true)
     {
-        return $this->storeManager->getStore()->getCurrentUrl($fromStore);
+        return $this->_storeManager->getStore()->getCurrentUrl($fromStore);
     }
 
     /**
@@ -140,7 +151,7 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
      */
     public function isStoreActive()
     {
-        return $this->storeManager->getStore()->isActive();
+        return $this->_storeManager->getStore()->isActive();
     }
 
     /**
@@ -222,6 +233,27 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * @return array
+     */
+    public function getAdditionLink()
+    {
+        //Additional Link
+        $additionUrl = $this->helper->getAdditionUrl();
+        $count = 0;
+        $additionLink = [];
+        while ($count >= 0) {
+            $countString = strpos($additionUrl, ']');
+            if ($countString == false) {
+                break;
+            }
+            $count++;
+            $additionLink[$count] = substr($additionUrl, 1, $countString - 1);
+            $additionUrl = substr($additionUrl, $countString, strlen($additionUrl));
+            $additionUrl = strstr($additionUrl, '[');
+        }
+        return $additionLink;
+    }
+    /**
      * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -289,6 +321,25 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * @param Store $store
+     * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getTargetStoreRedirectUrl(Store $store): string
+    {
+        return $this->_urlBuilder->getUrl(
+            'stores/store/redirect',
+            [
+                '___store' => $store->getCode(),
+                '___from_store' => $this->_storeManager->getStore()->getCode(),
+                ActionInterface::PARAM_NAME_URL_ENCODED => $this->encoder->encode(
+                    $store->getBaseUrl()
+                ),
+            ]
+        );
+    }
+
+    /**
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
@@ -301,17 +352,23 @@ class ItemsCollection extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * Returns target store post data
-     *
-     * @param \Magento\Store\Model\Store $store
+     * @param Store $store
      * @param array $data
      * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getTargetStorePostData(\Magento\Store\Model\Store $store, $data = [])
     {
         $data[\Magento\Store\Api\StoreResolverInterface::PARAM_NAME] = $store->getCode();
+        $data['___from_store'] = $this->_storeManager->getStore()->getCode();
+
+        $urlOnTargetStore = $store->getBaseUrl();
+        $data[ActionInterface::PARAM_NAME_URL_ENCODED] = $this->urlHelper->getEncodedUrl($urlOnTargetStore);
+
+        $url = $this->getUrl('stores/store/redirect');
+
         return $this->postDataHelper->getPostData(
-            $this->getUrl('/'),
+            $url,
             $data
         );
     }

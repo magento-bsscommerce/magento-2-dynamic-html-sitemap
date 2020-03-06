@@ -12,20 +12,17 @@
  * @category   BSS
  * @package    BSS_HtmlSiteMap
  * @author     Extension Team
- * @copyright  Copyright (c) 2017-2018 BSS Commerce Co. ( http://bsscommerce.com )
+ * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
 namespace Bss\HtmlSiteMap\Block;
 
-use Magento\Directory\Helper\Data;
-
+/**
+ * Class CategoryCollection
+ * @package Bss\HtmlSiteMap\Block
+ */
 class CategoryCollection extends \Magento\Framework\View\Element\Template
 {
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    public $storeManager;
-
     /**
      * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
      */
@@ -42,15 +39,9 @@ class CategoryCollection extends \Magento\Framework\View\Element\Template
     public $helper;
 
     /**
-     * @var \Magento\Catalog\Model\Indexer\Category\Flat\State
-     */
-    public $categoryFlatConfig;
-
-    /**
      * @var \Magento\Cms\Model\PageFactory
      */
     public $pageFactory;
-
 
     /**
      * ItemsCollection constructor.
@@ -67,16 +58,13 @@ class CategoryCollection extends \Magento\Framework\View\Element\Template
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
         \Magento\Catalog\Helper\Category $categoryHelper,
         \Bss\HtmlSiteMap\Helper\Data $helper,
-        \Magento\Catalog\Model\Indexer\Category\Flat\State $categoryFlatState,
         \Magento\Cms\Model\PageFactory $pageFactory,
         array $data = []
     ) {
         $this->pageFactory = $pageFactory;
-        $this->categoryFlatConfig = $categoryFlatState;
         $this->helper = $helper;
         $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->categoryHelper = $categoryHelper;
-        $this->storeManager = $context->getStoreManager();
         parent::__construct($context, $data);
     }
 
@@ -86,7 +74,7 @@ class CategoryCollection extends \Magento\Framework\View\Element\Template
      */
     public function getStoreId()
     {
-        return $this->storeManager->getStore()->getId();
+        return $this->_storeManager->getStore()->getId();
     }
 
     /**
@@ -96,39 +84,33 @@ class CategoryCollection extends \Magento\Framework\View\Element\Template
     {
         return $this->helper;
     }
+
     /**
      * @param bool $isActive
-     * @param bool $level
-     * @param bool $sortBy
-     * @param bool $pageSize
      * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
      * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getCategoryCollection($isActive = true, $level = false, $sortBy = false, $pageSize = false)
+    public function getCategoryCollection($isActive = true)
     {
+        $rootCategoryIds = [];
+        $currentWebsiteId = $this->_storeManager->getStore()->getWebsiteId();
+        $stores = $this->_storeManager->getStores(false);
+        foreach ($stores as $store) {
+            $websiteId = $store->getWebsiteId();
+            if ($currentWebsiteId == $websiteId) {
+                $rootCategoryIds[] = $store->getRootCategoryId();
+            }
+        }
         $collection = $this->categoryCollectionFactory->create();
         $collection->addAttributeToSelect('*');
-        
         // select only active categories
         if ($isActive) {
             $collection->addIsActiveFilter();
         }
-                
-        // select categories of certain level
-        if ($level) {
-            $collection->addLevelFilter($level);
+        if (!empty($rootCategoryIds)) {
+            $collection->addFieldToFilter('entity_id', ['in' => $rootCategoryIds]);
         }
-        
-        // sort categories by some value
-        if ($sortBy) {
-            $collection->addOrderField($sortBy);
-        }
-        
-        // select certain number of categories
-        if ($pageSize) {
-            $collection->setPageSize($pageSize);
-        }
-        
         return $collection;
     }
 
@@ -141,7 +123,7 @@ class CategoryCollection extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * @return \Magento\Cms\Model\Page
+     * @return \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getCmsPages()
@@ -151,33 +133,7 @@ class CategoryCollection extends \Magento\Framework\View\Element\Template
         $collection = $this->pageFactory->create()->getCollection();
         $collection->addFieldToSelect("*");
         $collection->addStoreFilter($storeId);
-        //$collection->load(1);
         return $collection;
-    }
-
-    /**
-     * @param bool $sorted
-     * @param bool $asCollection
-     * @param bool $toLoad
-     * @return \Magento\Framework\Data\Tree\Node\Collection
-     */
-    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
-    {
-        return $this->categoryHelper->getStoreCategories($sorted, $asCollection, $toLoad);
-    }
-
-    /**
-     * @param object $category
-     * @return array
-     */
-    public function getChildCategories($category)
-    {
-        if ($this->categoryFlatConfig->isFlatEnabled() && $category->getUseFlatResource()) {
-            $subcategories = (array)$category->getChildrenNodes();
-        } else {
-            $subcategories = $category->getChildren();
-        }
-        return $subcategories;
     }
 
     /**
@@ -189,25 +145,25 @@ class CategoryCollection extends \Magento\Framework\View\Element\Template
     {
         $categoryHelper = $this->getCategoryHelper();
         $categoryHtmlEnd = null;
-        if ($childrenCategories = $this->getChildCategories($category)) {
+        if ($childrenCategories = $category->getChildrenCategories()) {
             foreach ($childrenCategories as $category) {
                 if (!$category->getIsActive()) {
                     continue;
                 }
                 $categoryString = (string)$category->getId();
-                $categoryString = ",".$categoryString.",";
+                $categoryString = "," . $categoryString . ",";
                 $categoryValidate = strpos($categoryDisable, $categoryString);
                 if ($categoryValidate == false) {
                     $categoryUrl = $categoryHelper->getCategoryUrl($category);
-                    $categoryHtml = '<li><a href="'.$categoryUrl.'">'.$category->getName().'</a></li>';
+                    $categoryHtml = '<li><a href="' . $categoryUrl . '">' . $category->getName() . '</a></li>';
                     $categoryReturn = $this->getAllCategories($category, $categoryDisable);
-                    $categoryHtml = $categoryHtml.$categoryReturn;
+                    $categoryHtml = $categoryHtml . $categoryReturn;
                 } else {
                     $categoryHtml = null;
                 }
-                $categoryHtmlEnd = $categoryHtmlEnd.$categoryHtml;
+                $categoryHtmlEnd = $categoryHtmlEnd . $categoryHtml;
             }
-            return '<ul>'.$categoryHtmlEnd.'</ul>';
+            return '<ul>' . $categoryHtmlEnd . '</ul>';
         }
         return '';
     }

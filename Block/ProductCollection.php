@@ -12,7 +12,7 @@
  * @category   BSS
  * @package    BSS_HtmlSiteMap
  * @author     Extension Team
- * @copyright  Copyright (c) 2017-2018 BSS Commerce Co. ( http://bsscommerce.com )
+ * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
 namespace Bss\HtmlSiteMap\Block;
@@ -88,9 +88,17 @@ class ProductCollection extends \Magento\Framework\View\Element\Template
 
         $collection->addAttributeToFilter('visibility', \Magento\Catalog\Model\Product\Visibility::VISIBILITY_BOTH);
         $rulerStatus = \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED;
-        $collection->addAttributeToFilter('status', $rulerStatus);
+
+        $collection
+            ->addAttributeToFilter('status', $rulerStatus)
+            ->addFieldToFilter('excluded_html_sitemap', [
+                ['null' => true],
+                ['eq' => ''],
+                ['eq' => 'NO FIELD'],
+                ['eq' => '0'],
+            ]);
+
         $collection->addWebsiteFilter();
-        $collection->addFieldToFilter([['attribute'=>'visibility', 'neq'=>"1" ]]);
         $collection->addUrlRewrite();
         $collection->addAttributeToSort($sortProduct, $orderProduct);
         $collection->setPageSize($maxProducts);

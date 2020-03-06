@@ -12,14 +12,18 @@
  * @category   BSS
  * @package    BSS_HtmlSiteMap
  * @author     Extension Team
- * @copyright  Copyright (c) 2017-2018 BSS Commerce Co. ( http://bsscommerce.com )
+ * @copyright  Copyright (c) 2018-2019 BSS Commerce Co. ( http://bsscommerce.com )
  * @license    http://bsscommerce.com/Bss-Commerce-License.txt
  */
 namespace Bss\HtmlSiteMap\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
 
-class AddSiteMap implements ObserverInterface
+/**
+ * Class AddSitemap
+ * @package Bss\HtmlSiteMap\Observer
+ */
+class AddSitemap implements ObserverInterface
 {
     /**
      * @var \Bss\HtmlSiteMap\Block\ItemsCollection
@@ -60,15 +64,15 @@ class AddSiteMap implements ObserverInterface
         $block = $this->siteMapBlock;
 
         if ($orderTemplates == '' || $orderTemplates == null) {
-            $orderTemplates = $block::PRODUCT_LIST_NUMBER.','.$block::STORE_VIEW_LIST_NUMBER.','.$block::ADDITIONAL_LIST_NUMBER.','.$block::CATE_AND_CMS_NUMBER;
+            $orderTemplates = $block::PRODUCT_LIST_NUMBER . ',' . $block::STORE_VIEW_LIST_NUMBER . ',' . $block::ADDITIONAL_LIST_NUMBER . ',' . $block::CATE_AND_CMS_NUMBER;
         }
 
-        $orderTemplates = ",".$orderTemplates.",";
+        $orderTemplates = "," . $orderTemplates . ",";
         $orderTemplates = explode(',', $orderTemplates);
 
         $fullActionName = $observer->getData('full_action_name');
-        
-        if ($fullActionName != 'sitemap_index_index') {
+
+        if ($fullActionName != 'custom_route_index_index') {
             return $this;
         }
 
