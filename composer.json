@@ -2,7 +2,7 @@
     "name": "bsscommerce/html-sitemap",
     "description": "Bss Html Sitemap",
     "type": "magento2-module",
-    "version": "1.0.9",
+    "version": "1.1.2",
     "extra": {
         "suite": "seo-suite"
     },
@@ -17,5 +17,8 @@
         "psr-4": {
             "Bss\\HtmlSiteMap\\": ""
         }
+    },
+    "require": {
+        "bsscommerce/seo-core": "*"
     }
 }

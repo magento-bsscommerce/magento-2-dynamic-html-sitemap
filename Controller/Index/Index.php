@@ -91,7 +91,7 @@ class Index extends \Magento\Framework\App\Action\Action
             $resultPage->getConfig()->getTitle()->set(__($title));
             $resultPage->getConfig()->setDescription($description);
             $resultPage->getConfig()->setKeywords($keywords);
-            $resultPage->getConfig()->setMetadata('meta_title', $metaTitle);
+            $resultPage->getConfig()->setMetaTitle($metaTitle);
             return $resultPage;
         } else {
             return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setUrl($redirectUrl);

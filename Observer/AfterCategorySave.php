@@ -42,19 +42,27 @@ class AfterCategorySave implements ObserverInterface
     private $cache;
 
     /**
+     * @var \Bss\SeoCore\Helper\Data
+     */
+    protected $seoCoreHelper;
+
+    /**
      * AfterCategorySave constructor.
      * @param \Magento\Config\Model\ResourceModel\Config $resourceConfig
      * @param CacheTypeListInterface $cache
      * @param \Bss\HtmlSiteMap\Helper\Data $dataHelper
+     * @param \Bss\SeoCore\Helper\Data $seoCoreHelper
      */
     public function __construct(
         \Magento\Config\Model\ResourceModel\Config $resourceConfig,
         CacheTypeListInterface $cache,
-        \Bss\HtmlSiteMap\Helper\Data $dataHelper
+        \Bss\HtmlSiteMap\Helper\Data $dataHelper,
+        \Bss\SeoCore\Helper\Data $seoCoreHelper
     ) {
         $this->cache = $cache;
         $this->dataHelper = $dataHelper;
         $this->resourceConfig = $resourceConfig;
+        $this->seoCoreHelper = $seoCoreHelper;
     }
 
     /**
@@ -84,7 +92,7 @@ class AfterCategorySave implements ObserverInterface
                 $this->cache->invalidate('full_page');
             }
         }
-        $finalCategoriesDisable = implode(',', $categoryDisableArray);
+        $finalCategoriesDisable = $this->seoCoreHelper->implode(',', $categoryDisableArray);
         $scopeToAdd = ScopeInterface::SCOPE_STORES;
         if ((int)$storeId === 0) {
             $scopeToAdd = 'default';
