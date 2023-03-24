@@ -51,9 +51,8 @@ class Checkbox extends \Magento\Framework\View\Element\Template
      */
     public function toOptionArray()
     {
-
         $this->getStoreId();
-
+        $cms = [];
         $page = $this->pageFactory->create();
         foreach ($page->getCollection() as $item) {
             $cms[$item->getId()] = $item->getTitle();
